@@ -9,11 +9,11 @@ cd "$(dirname "$0")/.."
 
 # 3. 构建 Docker 镜像
 echo "🔨 构建 Docker 镜像..."
-docker-compose build || { echo "❌ Docker 构建失败"; exit 1; }
+docker compose build || { echo "❌ Docker 构建失败"; exit 1; }
 
 # 4. 启动/重启服务
-echo "🟢 启动/重启服务..."
-docker-compose up -d || { echo "❌ Docker 启动失败"; exit 1; }
+echo "�� 启动/重启服务..."
+docker compose up -d || { echo "❌ Docker 启动失败"; exit 1; }
 
 # 5. 健康检查函数
 check_health() {
@@ -40,13 +40,13 @@ check_health "ocr_service" 4001 || exit 1
 
 # 7. 显示服务状态
 echo "📋 当前服务状态："
-docker-compose ps
+docker compose ps
 
 # 8. 日志收集与输出（可选：只显示最近100行）
 echo "📑 doc_service 日志（最近100行）："
-docker-compose logs --tail=100 doc_service
+docker compose logs --tail=100 doc_service
 
 echo "📑 ocr_service 日志（最近100行）："
-docker-compose logs --tail=100 ocr_service
+docker compose logs --tail=100 ocr_service
 
 echo "🎉 部署完成！所有服务已启动并通过健康检查。"
