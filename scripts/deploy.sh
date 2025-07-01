@@ -4,8 +4,8 @@
 cd "$(dirname "$0")/.."
 
 # 2. 拉取最新代码
-echo "🚀 拉取最新代码..."
-git pull || { echo "❌ git pull 失败，请检查网络或权限"; exit 1; }
+# echo "🚀 拉取最新代码..."
+# git pull || { echo "❌ git pull 失败，请检查网络或权限"; exit 1; }
 
 # 3. 构建 Docker 镜像
 echo "🔨 构建 Docker 镜像..."
