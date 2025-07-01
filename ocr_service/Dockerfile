@@ -2,10 +2,11 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# 1. 切换 apt 源为阿里云，加速系统依赖下载
-RUN sed -i 's@http://deb.debian.org@https://mirrors.aliyun.com@g' /etc/apt/sources.list
+# 兼容新老 Debian slim 镜像的 apt 源替换
+RUN sed -i 's@http://deb.debian.org@https://mirrors.aliyun.com@g' /etc/apt/sources.list || true \
+    && sed -i 's@http://deb.debian.org@https://mirrors.aliyun.com@g' /etc/apt/sources.list.d/debian.sources || true
 
-# 2. 安装系统依赖和 Tesseract OCR（含中文包）
+# 安装系统依赖和 Tesseract OCR（含中文包）
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libmagic1 \
@@ -13,11 +14,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     tesseract-ocr-chi-sim \
     && rm -rf /var/lib/apt/lists/*
 
-# 3. 安装 Python 依赖
+# 安装 Python 依赖
 COPY requirements.txt ./
 RUN pip install -i https://mirrors.aliyun.com/pypi/simple/ --no-cache-dir -r requirements.txt
 
-# 4. 复制项目文件
+# 复制项目文件
 COPY . .
 
 # 暴露端口
