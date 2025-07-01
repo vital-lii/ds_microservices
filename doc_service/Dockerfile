@@ -2,10 +2,15 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-#安装系统依赖
+# 切换 apt 源为阿里云，加速系统依赖下载
+RUN sed -i 's@http://deb.debian.org@https://mirrors.aliyun.com@g' /etc/apt/sources.list
+
+# 安装系统依赖和 Tesseract OCR（含中文包）
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libmagic1 \
+    tesseract-ocr \
+    tesseract-ocr-chi-sim \
     && rm -rf /var/lib/apt/lists/*
 
 # 安装依赖文件
