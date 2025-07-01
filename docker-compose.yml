@@ -1,0 +1,15 @@
+version: "3.8"
+services:
+  doc_service:
+    build: ./doc_service
+    ports:
+      - "4000:4000"
+    env_file:
+      - .env
+
+  ocr_service:
+    build: ./ocr_service
+    ports:
+      - "4001:4001"
+    env_file:
+      - .env
