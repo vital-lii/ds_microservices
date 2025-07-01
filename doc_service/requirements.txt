@@ -4,3 +4,4 @@ python-dotenv
 docx2txt
 PyPDF2
 markdown
+python-multipart
