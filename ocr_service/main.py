@@ -6,7 +6,7 @@ from PIL import Image
 import pytesseract
 import io
 import logging
-import winreg
+import sys
 from pathlib import Path
 
 # 加载.env文件
@@ -27,6 +27,11 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(mess
 
 app = FastAPI()
 
+if sys.platform == "win32":
+    import winreg
+else:
+    winreg = None
+
 def get_tesseract_path():
     """自动定位 Tesseract 的可执行文件"""
     # 1. 检查符号链接路径
@@ -43,15 +48,16 @@ def get_tesseract_path():
         if Path(path).exists():
             return path
     
-    # 3. 从注册表获取安装路径
-    try:
-        with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\\Tesseract-OCR") as key:
-            install_dir = winreg.QueryValueEx(key, "InstallPath")[0]
-            exe_path = Path(install_dir) / "tesseract.exe"
-            if exe_path.exists():
-                return str(exe_path)
-    except Exception:
-        pass
+    # 3. 从注册表获取安装路径（仅 Windows 下尝试）
+    if sys.platform == "win32" and winreg is not None:
+        try:
+            with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\\Tesseract-OCR") as key:
+                install_dir = winreg.QueryValueEx(key, "InstallPath")[0]
+                exe_path = Path(install_dir) / "tesseract.exe"
+                if exe_path.exists():
+                    return str(exe_path)
+        except Exception:
+            pass
     
     # 4. 尝试系统 PATH（最后手段）
     try:
