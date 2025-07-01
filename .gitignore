@@ -14,3 +14,6 @@ venv/
 # VSCode/IDE
 .vscode/
 .idea/
+
+# 忽略share的代码
+share/
