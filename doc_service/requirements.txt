@@ -5,3 +5,8 @@ docx2txt
 PyPDF2
 markdown
 python-multipart
+pydantic
+aiohttp
+requests
+# astunparse # 如未用可去掉
+# sqlite-web # 如未用可去掉

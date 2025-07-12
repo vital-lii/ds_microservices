@@ -1,5 +1,5 @@
 import os
-from fastapi import FastAPI, UploadFile, File, HTTPException, Header, status
+from fastapi import FastAPI, UploadFile, File, HTTPException, Header, status, Form
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 from PIL import Image
@@ -8,6 +8,7 @@ import io
 import logging
 import sys
 from pathlib import Path
+import aiohttp
 
 # 加载.env文件
 load_dotenv(dotenv_path=Path(__file__).parent.parent / '.env')
@@ -103,6 +104,48 @@ async def ocr_image(
     text = text.strip()[:2000]  # 限制返回长度
     logging.info(f"OCR识别成功: {file.filename}, 长度: {len(text)}")
     return JSONResponse(content={"text": text})
+
+@app.post("/ocr_and_analyze")
+async def ocr_and_analyze(
+    file: UploadFile = File(...),
+    authorization: str = Header(None),
+    prompt: str = Form(None)
+):
+    # Token校验
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Missing or invalid Authorization header")
+    token = authorization.split(" ")[1]
+    verify_token(token)
+
+    try:
+        image = Image.open(io.BytesIO(await file.read()))
+        if max(image.width, image.height) > 2000:
+            image.thumbnail((2000, 2000))
+        text = pytesseract.image_to_string(image, lang='chi_sim+eng').strip()[:2000]
+    except Exception as e:
+        logging.error(f"OCR识别失败: {e}")
+        raise HTTPException(status_code=500, detail="OCR failed")
+
+    # 调用 doc_service 的 /v1/analyze
+    doc_service_url = "http://localhost:4000/v1/analyze"  # 或者你的 doc_service 实际地址
+    payload = {
+        "code": text,
+        "use_deepseek": True
+    }
+    if prompt:
+        payload["prompt"] = prompt
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json"
+    }
+    async with aiohttp.ClientSession() as session:
+        async with session.post(doc_service_url, headers=headers, json=payload) as resp:
+            if resp.status != 200:
+                error_text = await resp.text()
+                logging.error(f"doc_service 调用失败: {error_text}")
+                raise HTTPException(status_code=500, detail=f"doc_service failed: {error_text}")
+            result = await resp.json()
+    return result
 
 # 可选：健康检查
 @app.get("/health")

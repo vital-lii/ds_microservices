@@ -17,3 +17,5 @@ venv/
 
 # 忽略share的代码
 share/
+
+ds_con.py

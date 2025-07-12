@@ -62,8 +62,8 @@ class CursorLikeCLI:
         self.deepseek_api = DeepSeekAPI()
         self.conversation_history = []
         self.current_context = {}
-        self.doc_service_url = "http://localhost:4000"
-        self.ocr_service_url = "http://localhost:4001"
+        self.doc_service_url = "http://47.106.218.33:4000"
+        self.ocr_service_url = "http://47.106.218.33:4001"
         self.token = os.getenv("TOKEN")
         
         # 如果 .env 文件没有加载成功，手动设置 TOKEN
@@ -95,7 +95,7 @@ class CursorLikeCLI:
         
         print(f"📁 正在处理文件：{file_path}")
         
-        if file_path.suffix.lower() in ['.py', '.js', '.java', '.cpp', '.c', '.go', '.md']:
+        if file_path.suffix.lower() in ['.py', '.js', '.java', '.cpp', '.c', '.go', '.md','.yaml','.yml','txt','.sh','.txt']:
             # 代码文件或 Markdown
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()

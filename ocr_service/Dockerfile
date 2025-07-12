@@ -22,7 +22,7 @@ RUN pip install -i https://mirrors.aliyun.com/pypi/simple/ --no-cache-dir -r req
 COPY . .
 
 # 暴露端口
-EXPOSE 4001
+EXPOSE 4001 9081
 
 # 推荐用环境变量或 docker-compose 传递 TOKEN 和 API KEY
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "4001"]
