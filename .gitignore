@@ -23,6 +23,7 @@ ds_con.py
 memory_service/
 adapter/
 scripts/setup_memory.sh
+# 这个是加上了记忆体的yml文件（新）
+docker-compose02new.yml 
 
-docker-compose02.yml
 

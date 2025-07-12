@@ -17,6 +17,8 @@ import datetime
 import asyncio
 import json
 import aiohttp
+import csv
+import json
 
 # 加载.env文件
 load_dotenv(dotenv_path=Path(__file__).parent.parent / '.env')
@@ -189,6 +191,38 @@ async def extract_text(
             text = decode_text(content, encodings=['utf-8'])
         elif file.filename.endswith('.yaml') or file.filename.endswith('.yml'):
             text = decode_text(content, encodings=['utf-8'])
+        elif file.filename.endswith('.json'):
+            try:
+                #先解码尝试
+                content_str = content.decode('utf-8')
+                json_data = json.loads(content_str)
+                #保持该格式可读性
+                text = json.dumps(json_data, indent=2, ensure_ascii=False)
+            except json.JSONDecodeError as e:
+                logger.error(f"JSON文件解析失败: {e}")
+                raise HTTPException(400, "JSON文件解析失败")
+            except UnicodeDecodeError:
+                try:
+                    content_str = content.decode('gbk')
+                    json_data = json.loads(content_str)
+                    text = json.dumps(json_data, indent=2, ensure_ascii=False)
+                except Exception as e:
+                    logger.error(f"JSON文件解析失败: {e}")
+                    raise HTTPException(400, "JSON文件解析失败")    
+        elif file.filename.endswith('.csv'):
+            try:
+                content_str = content.decode('utf-8-sig')
+                csv_reader = csv.DictReader(content_str.splitlines())
+                rows = list(csv_reader)
+                if len(rows) > 0:
+                    #有表头，获取
+                    csv_reader = csv.DictReader(content_str.splitlines())
+                    text = json.dumps(list(csv_reader), indent=2, ensure_ascii=False)
+                else:
+                    text = '[]' #空CSV文件
+            except Exception as e:
+                logger.error(f"CSV文件解析失败: {e}")
+                raise HTTPException(400, "CSV文件解析失败")
         elif file.filename.endswith('.md'):
             # 尝试 utf-8 和 gbk 解码
             try:
@@ -200,7 +234,7 @@ async def extract_text(
                     logger.error(f"文件编码解析失败: {e}")
                     raise HTTPException(400, "Unsupported file encoding")
         else:
-            supported_formats = ['.pdf', '.docx', '.md','.txt','.sh','.yaml','.yml']
+            supported_formats = ['.pdf', '.docx', '.md','.txt','.sh','.yaml','.yml','.json','.csv']
             raise HTTPException(
                 status_code=400,
                 detail=f"Unsupported file type. Supported formats: {', '.join(supported_formats)}"

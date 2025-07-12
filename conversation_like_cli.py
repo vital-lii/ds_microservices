@@ -94,8 +94,40 @@ class CursorLikeCLI:
             return
         
         print(f"📁 正在处理文件：{file_path}")
-        
-        if file_path.suffix.lower() in ['.py', '.js', '.java', '.cpp', '.c', '.go', '.md','.yaml','.yml','txt','.sh','.txt']:
+        #更新支持
+        supported_local_types = ['.py', '.js', '.java', '.cpp', '.c', '.go', '.md','.yaml','.yml','txt','.sh','.txt','csv','json']
+        doc_service_types = ['.pdf', '.docx', '.yaml', '.yml', '.json', '.csv']
+        file_ext = file_path.suffix.lower()
+        if file_ext in supported_local_types:
+            #直接读取
+            try:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                self.current_context = {
+                    "type": "code" if file_path.suffix.lower() != '.md' else "markdown",
+                    "language": file_path.suffix[1:],
+                    "content": content,
+                    "file_path": str(file_path)
+                }
+            except Exception as e:
+                print(f"❌ 文件读取失败: {e}")
+                return
+        elif file_ext in doc_service_types:
+            # 调用文档服务的文件类型
+            content = await self._call_doc_service(file_path)
+            self.current_context = {
+                "type": "document",
+                "content": content,
+                "file_path": str(file_path)
+            }
+        elif file_ext in ocr_service_types:
+            # 调用 OCR 服务的文件类型
+            content = await self._call_ocr_service(file_path)
+            self.current_context = {
+                "type": "image",
+                "content": content,
+                "file_path": str(file_path)
+            }
             # 代码文件或 Markdown
             with open(file_path, 'r', encoding='utf-8') as f:
                 content = f.read()
