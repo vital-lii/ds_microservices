@@ -24,3 +24,5 @@ memory_service/
 adapter/
 scripts/setup_memory.sh
 
+docker-compose02.yml
+

@@ -13,10 +13,3 @@ services:
       - "4001:4001"
     env_file:
       - .env
-
-  memory_service:
-    build: ./memory_service
-    ports:
-      - "9081:9081"
-    env_file:
-      - .env
