@@ -19,3 +19,8 @@ venv/
 share/
 
 ds_con.py
+# 忽视还未完善的程序文件夹
+memory_service/
+adapter/
+scripts/setup_memory.sh
+
